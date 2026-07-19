@@ -3,7 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import HomePage from "./pages/HomePage";
+import ContactsPage from "./pages/ContactsPage";
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <ContactsPage />
               </ProtectedRoute>
             }
           />
