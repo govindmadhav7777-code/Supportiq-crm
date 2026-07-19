@@ -26,3 +26,7 @@ class Contact(Base):
     # Every contact belongs to exactly one user (the rep tracking them).
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="contacts")
+
+    # One contact can have many deals (e.g. repeat business, multiple
+    # opportunities with the same company).
+    deals = relationship("Deal", back_populates="contact", cascade="all, delete-orphan")

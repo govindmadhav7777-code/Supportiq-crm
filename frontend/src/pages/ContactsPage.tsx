@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   listContacts,
@@ -57,7 +58,12 @@ export default function ContactsPage() {
     <div className="min-h-screen bg-slate-50 px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Contacts</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-slate-800">Contacts</h1>
+            <Link to="/pipeline" className="text-blue-600 hover:underline text-sm">
+              Pipeline →
+            </Link>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => setModalState("new")}
