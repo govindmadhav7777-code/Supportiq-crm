@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import Layout from "../components/Layout";
+import FunnelMark from "../components/FunnelMark";
 import {
   listContacts,
   createContact,
@@ -11,14 +12,28 @@ import {
 } from "../api/contacts";
 import ContactFormModal from "../components/ContactFormModal";
 
-export default function ContactsPage() {
-  const { logout } = useAuth();
+// Deterministic accent per contact, based on their name — a subtle
+// ring color variation on the monogram square, not a rainbow of
+// filled backgrounds (keeps things quiet, per the ink/gold palette).
+const ACCENTS = ["ring-gold-400", "ring-ink-400", "ring-emerald-400", "ring-sky-400"];
 
+function accentFor(name: string) {
+  return ACCENTS[name.charCodeAt(0) % ACCENTS.length];
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Modal state: null = closed, "new" = create mode, a Contact = edit mode
   const [modalState, setModalState] = useState<Contact | "new" | null>(null);
 
   async function refresh() {
@@ -55,80 +70,101 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-slate-800">Contacts</h1>
-            <Link to="/pipeline" className="text-blue-600 hover:underline text-sm">
-              Pipeline →
-            </Link>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setModalState("new")}
-              className="bg-blue-600 text-white rounded px-4 py-2 font-medium hover:bg-blue-700"
-            >
-              + Add contact
-            </button>
-            <button
-              onClick={logout}
-              className="border border-slate-300 rounded px-4 py-2 font-medium text-slate-700 hover:bg-slate-100"
-            >
-              Log out
-            </button>
-          </div>
+    <Layout>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="font-display font-bold text-2xl text-ink-900 tracking-tight">
+            Contacts
+          </h1>
+          <p className="text-ink-400 text-sm mt-0.5">
+            {contacts.length} {contacts.length === 1 ? "contact" : "contacts"}
+          </p>
         </div>
-
-        {isLoading && <p className="text-slate-400">Loading contacts...</p>}
-        {error && <p className="text-red-600">{error}</p>}
-
-        {!isLoading && !error && contacts.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-8 text-center text-slate-500">
-            No contacts yet — click "Add contact" to create your first one.
-          </div>
-        )}
-
-        {!isLoading && contacts.length > 0 && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="bg-slate-100 text-slate-600 text-sm">
-                <tr>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Company</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Phone</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {contacts.map((contact) => (
-                  <tr key={contact.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-800">{contact.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{contact.company || "—"}</td>
-                    <td className="px-4 py-3 text-slate-600">{contact.email || "—"}</td>
-                    <td className="px-4 py-3 text-slate-600">{contact.phone || "—"}</td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => setModalState(contact)}
-                        className="text-blue-600 hover:underline text-sm mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(contact.id)}
-                        className="text-red-600 hover:underline text-sm"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          <Link to="/pipeline" className="text-sm font-medium text-ink-500 hover:text-ink-900">
+            View pipeline →
+          </Link>
+          <button
+            onClick={() => setModalState("new")}
+            className="bg-ink-900 text-white rounded-lg px-4 py-2.5 font-display font-semibold text-sm hover:bg-ink-800 transition-colors"
+          >
+            + Add contact
+          </button>
+        </div>
       </div>
+
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-ink-100 p-5 animate-pulse">
+              <div className="w-10 h-10 rounded-lg bg-ink-100 mb-3" />
+              <div className="h-4 bg-ink-100 rounded w-2/3 mb-2" />
+              <div className="h-3 bg-ink-50 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && <p className="text-red-600">{error}</p>}
+
+      {!isLoading && !error && contacts.length === 0 && (
+        <div className="bg-white rounded-xl border border-dashed border-ink-200 p-14 text-center">
+          <FunnelMark className="w-10 h-10 text-ink-200 mx-auto mb-4" />
+          <p className="text-ink-700 font-display font-semibold">No contacts yet</p>
+          <p className="text-ink-400 text-sm mt-1">
+            Add your first contact to start building your pipeline.
+          </p>
+        </div>
+      )}
+
+      {!isLoading && contacts.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {contacts.map((contact) => (
+            <div
+              key={contact.id}
+              className="bg-white rounded-xl border border-ink-100 p-5 hover:shadow-lg hover:shadow-ink-900/5 hover:border-ink-200 transition-all group"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div
+                  className={`w-10 h-10 rounded-lg bg-ink-50 ring-2 ${accentFor(
+                    contact.name
+                  )} flex items-center justify-center font-display font-semibold text-sm text-ink-700`}
+                >
+                  {initials(contact.name)}
+                </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                  <button
+                    onClick={() => setModalState(contact)}
+                    className="text-xs font-medium text-ink-400 hover:text-gold-600 px-2 py-1 rounded hover:bg-ink-50"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(contact.id)}
+                    className="text-xs font-medium text-ink-400 hover:text-red-600 px-2 py-1 rounded hover:bg-ink-50"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <h3 className="font-display font-semibold text-ink-900">{contact.name}</h3>
+              {contact.company && (
+                <p className="text-sm text-ink-400 mt-0.5">{contact.company}</p>
+              )}
+
+              <div className="mt-3 pt-3 border-t border-ink-50 space-y-1">
+                {contact.email && (
+                  <p className="text-xs text-ink-400 truncate font-mono">{contact.email}</p>
+                )}
+                {contact.phone && (
+                  <p className="text-xs text-ink-400 font-mono">{contact.phone}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {modalState === "new" && (
         <ContactFormModal onSubmit={handleCreate} onClose={() => setModalState(null)} />
@@ -141,6 +177,6 @@ export default function ContactsPage() {
           onClose={() => setModalState(null)}
         />
       )}
-    </div>
+    </Layout>
   );
 }

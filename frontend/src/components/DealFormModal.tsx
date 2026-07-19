@@ -51,42 +51,42 @@ export default function DealFormModal({ initial, contacts, onSubmit, onClose }: 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-        <h2 className="text-xl font-bold text-slate-800 mb-4">
+    <div className="fixed inset-0 bg-ink-950/50 backdrop-blur-sm flex items-center justify-center px-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+        <h2 className="text-lg font-display font-bold text-ink-900 mb-4">
           {initial ? "Edit deal" : "Add deal"}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Title *</label>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Title *</label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-ink-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-shadow"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Value ($)</label>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Value ($)</label>
             <input
               type="number"
               min="0"
               step="0.01"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-ink-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-shadow"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Contact *</label>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Contact *</label>
             <select
               value={contactId}
               onChange={(e) => setContactId(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-ink-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-shadow"
             >
               {contacts.length === 0 && <option value="">No contacts yet</option>}
               {contacts.map((c) => (
@@ -98,11 +98,11 @@ export default function DealFormModal({ initial, contacts, onSubmit, onClose }: 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Stage</label>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Stage</label>
             <select
               value={stage}
               onChange={(e) => setStage(e.target.value as DealStage)}
-              className="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-ink-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-shadow"
             >
               {Object.entries(STAGE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -118,14 +118,14 @@ export default function DealFormModal({ initial, contacts, onSubmit, onClose }: 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-slate-300 rounded py-2 font-medium text-slate-700 hover:bg-slate-50"
+              className="flex-1 border border-ink-200 rounded-lg py-2.5 font-medium text-sm text-ink-700 hover:bg-ink-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-blue-600 text-white rounded py-2 font-medium hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 bg-ink-900 text-white rounded-lg py-2.5 font-medium text-sm hover:bg-ink-800 disabled:opacity-50 shadow-sm shadow-ink-900/10 transition-colors"
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>
