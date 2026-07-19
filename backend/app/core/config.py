@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24h, fine for a portfolio project
 
+    GEMINI_API_KEY: str = ""
+
     # CORS: which frontend origins are allowed to call this API
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 

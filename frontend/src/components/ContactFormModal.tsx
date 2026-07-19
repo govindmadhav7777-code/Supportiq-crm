@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import type { Contact, ContactInput } from "../api/contacts";
+import { summarizeNotes, generateEmail } from "../api/ai";
 
 type Props = {
   initial?: Contact; // if provided, form is in "edit" mode
@@ -20,6 +21,45 @@ export default function ContactFormModal({ initial, onSubmit, onClose }: Props) 
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // AI feature state — only usable in edit mode, since summarizing/
+  // drafting an email needs an existing contact_id on the backend.
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const [showEmailPanel, setShowEmailPanel] = useState(false);
+  const [emailInstructions, setEmailInstructions] = useState("");
+  const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
+  const [draftEmail, setDraftEmail] = useState<{ subject: string; body: string } | null>(null);
+
+  async function handleSummarize() {
+    if (!initial) return;
+    setAiError(null);
+    setIsSummarizing(true);
+    try {
+      const { summary } = await summarizeNotes(initial.id);
+      setSummary(summary);
+    } catch {
+      setAiError("Couldn't summarize notes. Make sure this contact has notes saved.");
+    } finally {
+      setIsSummarizing(false);
+    }
+  }
+
+  async function handleGenerateEmail() {
+    if (!initial) return;
+    setAiError(null);
+    setIsGeneratingEmail(true);
+    try {
+      const result = await generateEmail(initial.id, emailInstructions);
+      setDraftEmail(result);
+    } catch {
+      setAiError("Couldn't generate an email draft. Please try again.");
+    } finally {
+      setIsGeneratingEmail(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -42,8 +82,8 @@ export default function ContactFormModal({ initial, onSubmit, onClose }: Props) 
   }
 
   return (
-    <div className="fixed inset-0 bg-ink-950/50 backdrop-blur-sm flex items-center justify-center px-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+    <div className="fixed inset-0 bg-ink-950/50 backdrop-blur-sm flex items-center justify-center px-4 z-50 py-8 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full my-auto">
         <h2 className="text-lg font-display font-bold text-ink-900 mb-4">
           {initial ? "Edit contact" : "Add contact"}
         </h2>
@@ -99,6 +139,73 @@ export default function ContactFormModal({ initial, onSubmit, onClose }: Props) 
               className="w-full border border-ink-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-shadow"
             />
           </div>
+
+          {/* AI features only make sense once a contact exists — save
+              first, then re-open to use them, since they read from the
+              saved notes/name/company on the backend. */}
+          {initial && (
+            <div className="rounded-lg bg-gold-50/60 border border-gold-100 p-3.5 space-y-3">
+              <p className="text-xs font-display font-semibold text-gold-800 tracking-wide uppercase">
+                ✨ AI Assist
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleSummarize}
+                  disabled={isSummarizing}
+                  className="text-xs font-medium bg-white border border-gold-200 text-ink-700 rounded-md px-3 py-1.5 hover:border-gold-400 disabled:opacity-50 transition-colors"
+                >
+                  {isSummarizing ? "Summarizing..." : "Summarize notes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEmailPanel((v) => !v)}
+                  className="text-xs font-medium bg-white border border-gold-200 text-ink-700 rounded-md px-3 py-1.5 hover:border-gold-400 transition-colors"
+                >
+                  Draft follow-up email
+                </button>
+              </div>
+
+              {summary && (
+                <div className="bg-white rounded-md border border-gold-100 p-3">
+                  <p className="text-xs font-medium text-ink-500 mb-1">Summary</p>
+                  <p className="text-sm text-ink-800">{summary}</p>
+                </div>
+              )}
+
+              {showEmailPanel && (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Optional: what's this email about? (e.g. invite to a demo)"
+                    value={emailInstructions}
+                    onChange={(e) => setEmailInstructions(e.target.value)}
+                    className="w-full border border-gold-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-gold-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGenerateEmail}
+                    disabled={isGeneratingEmail}
+                    className="text-xs font-medium bg-ink-900 text-white rounded-md px-3 py-1.5 hover:bg-ink-800 disabled:opacity-50 transition-colors"
+                  >
+                    {isGeneratingEmail ? "Drafting..." : "Generate draft"}
+                  </button>
+
+                  {draftEmail && (
+                    <div className="bg-white rounded-md border border-gold-100 p-3 space-y-1.5">
+                      <p className="text-xs font-medium text-ink-500">
+                        Subject: <span className="text-ink-800">{draftEmail.subject}</span>
+                      </p>
+                      <p className="text-sm text-ink-800 whitespace-pre-wrap">{draftEmail.body}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {aiError && <p className="text-xs text-red-600">{aiError}</p>}
+            </div>
+          )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
