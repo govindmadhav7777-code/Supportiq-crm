@@ -6,8 +6,7 @@ data per-account once auth is wired up in Step 3.
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, String, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime, Uuid
 from sqlalchemy.orm import relationship
 
 from app.db.session import Base
@@ -16,7 +15,7 @@ from app.db.session import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=True)

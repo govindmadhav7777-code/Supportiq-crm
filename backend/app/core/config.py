@@ -15,8 +15,7 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "SupportIQ CRM"
     API_V1_PREFIX: str = "/api/v1"
-
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/supportiq"
+    DATABASE_URL: str = "sqlite:///./supportiq.db"
 
     JWT_SECRET_KEY: str = "change-me-in-.env"
     JWT_ALGORITHM: str = "HS256"

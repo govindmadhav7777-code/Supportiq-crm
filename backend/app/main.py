@@ -12,27 +12,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.db.session import engine
-from app.db import base  # noqa: F401 — importing registers all models with Base.metadata
-from app.api import auth, contacts, deals, ai
+from app.db import base  # noqa: F401
+from app.api import auth, contacts, deals
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(contacts.router, prefix=settings.API_V1_PREFIX)
 app.include_router(deals.router, prefix=settings.API_V1_PREFIX)
-app.include_router(ai.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.on_event("startup")
 def create_tables():
-    """
-    Auto-creates tables that don't exist yet, based on our SQLAlchemy
-    models. Fine for local development — it's non-destructive (won't
-    touch existing tables or data). Once the schema stabilizes we'll
-    switch to Alembic migrations, which properly track schema changes
-    over time instead of just "create if missing."
-    """
     base.Base.metadata.create_all(bind=engine)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,6 +38,4 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    """Simple liveness check — useful for Docker healthchecks and for
-    confirming the server is up before wiring anything else."""
     return {"status": "ok", "service": settings.PROJECT_NAME}

@@ -2,7 +2,7 @@
 
 A full-stack CRM built to learn and demonstrate production-style backend + frontend engineering.
 
-**Stack:** React + TypeScript + Tailwind CSS · FastAPI (Python) · PostgreSQL · JWT auth · Docker
+**Stack:** React + TypeScript + Tailwind CSS · FastAPI (Python) · SQLite (dev default) / PostgreSQL · JWT auth · Docker
 
 > 🚧 Work in progress — built incrementally, step by step.
 
@@ -33,6 +33,8 @@ pip install -r requirements.txt
 cp .env.example .env           # then edit .env with your own values
 uvicorn app.main:app --reload
 ```
+
+By default, `.env.example` uses SQLite (`sqlite:///./supportiq.db`) so backend can start without a local Postgres server. If you want Postgres, replace `DATABASE_URL` in `.env` with your Postgres connection string.
 
 Visit `http://localhost:8000/docs` for the interactive API docs, or `http://localhost:8000/health` for a liveness check.
 
